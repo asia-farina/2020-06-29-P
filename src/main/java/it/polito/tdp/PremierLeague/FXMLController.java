@@ -8,6 +8,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.PremierLeague.model.Adiacenza;
+import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,29 +42,67 @@ public class FXMLController {
     private TextField txtMinuti; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbMese"
-    private ComboBox<?> cmbMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbM1"
-    private ComboBox<?> cmbM1; // Value injected by FXMLLoader
+    private ComboBox<Match> cmbM1; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbM2"
-    private ComboBox<?> cmbM2; // Value injected by FXMLLoader
+    private ComboBox<Match> cmbM2; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
 
     @FXML
     void doConnessioneMassima(ActionEvent event) {
-    	
-    }
+    	txtResult.clear();
+    	String s="";
+    	for (Adiacenza a:model.getBestCouple()) {
+    		s+=a.toString()+"\n";
+    	}
+    	txtResult.setText(s);
+     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	txtResult.clear();
+    	int mese;
+    	int minuti;
+    	try {
+    	    mese=cmbMese.getValue();
+    	    String s=txtMinuti.getText();
+    	    minuti=Integer.parseInt(s);
+    	    
+    	} catch (Exception e) {
+    		txtResult.appendText("Inserire un numero minimo di goal nel formato corretto");
+    		return;
+    	}
+        
+    	this.model.creaGrafo(mese, minuti);
+    	cmbM1.getItems().addAll(model.getMatch());
+        cmbM2.getItems().addAll(model.getMatch());
+    	txtResult.appendText("Grafo creato\n");
+    	txtResult.appendText("# VERTICI: " + this.model.getNumeroVertici()+ "\n");
+    	txtResult.appendText("# ARCHI: " + this.model.getNumeroArchi());
     	
     }
 
     @FXML
     void doCollegamento(ActionEvent event) {
+    	txtResult.clear();
+    	Match m1=cmbM1.getValue();
+    	Match m2=cmbM2.getValue();
+    	if (m1.equals(m2)) {
+    		txtResult.setText("Scegliere due match divers");
+    		return ;
+    	}
+    	String s="";
+    	model.collegamento(m1, m2);
+    	for (Match m:model.getCollegamento()) {
+    		s+=m.toString()+"\n";
+    	}
+    	s+="GRADO: "+model.getMax();
+    	txtResult.setText(s);
     	
     }
 
@@ -79,6 +120,11 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	List<Integer> mesi=new ArrayList<>();
+    	for (int i=1; i<=12; i++) {
+    		mesi.add(i);
+    	}
+    	cmbMese.getItems().addAll(mesi);
   
     }
     
